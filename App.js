@@ -9,7 +9,7 @@ import AppNavigator from './src/AppNavigator';
 import firebase from 'firebase';
 import config from './config';
 
-
+console.disableYellowBox = true;
 export default class App extends React.Component {
 
   componentWillMount() {

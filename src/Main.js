@@ -10,8 +10,40 @@ import { closeDrawer, openDrawer } from './actions/Drawer.actions';
 import EventMap from './components/EventMap';
 
 class Main extends Component {
+
+  componentDidMount() {
+    if (this.props.drawerState === 'closed') {
+      this.closeDrawer();
+    }
+  }
+
+  componentDidUpdate() {
+    console.log('app_nav did mount: ',this.props.drawerState);
+    if (this.props.drawerState === 'opened') {
+      this.openDrawer();
+    }
+
+    if (this.props.drawerState === 'closed') {
+      this.closeDrawer();
+    }
+  }
+
+  openDrawer() {
+    this._drawer._root.open();
+  }
+
+  closeDrawer() {
+    this._drawer._root.close();
+  }
+
   render() {
     return (
+    <Drawer
+      type="static"
+      content={<SideMenu navigator={this._navigator}/>}
+      onClose={() => this.props.closeDrawer()}
+      ref={(ref) => { this._drawer = ref; }}
+    >
       <Container>
         <StatusBar hidden={true} />
         <Header hasTabs>
@@ -27,17 +59,18 @@ class Main extends Component {
           </Right>
         </Header>
         <Tabs>
-          <Tab heading="Map">
-            <EventMap />
-          </Tab>
           <Tab heading={ <TabHeading><Icon name="flash" /><Text>Seegnals</Text></TabHeading>}>
             <EventTab />
+          </Tab>
+          <Tab heading="Map">
+            <EventMap />
           </Tab>
           <Tab heading="Tab3">
             <Text>three</Text>
           </Tab>
         </Tabs>
       </Container>
+    </Drawer>
     );
   }
 }
@@ -50,20 +83,7 @@ const mapDispatchToProps = dispatch => ({
 });
 
 const mapStateToProps = state => ({
-
+  drawerState: state.drawer.drawerState,
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Main);
-
-// return (
-//   <Drawer
-//     type="static"
-//     open={this.state.isOpen}
-//     content={<SideMenu navigator={this._navigator}/>}
-//     onClose={() => this.closeDrawer()}
-//     styles={{ flex: 1 }}
-//   >
-//     { Content }
-//   </Drawer>
-// );
-

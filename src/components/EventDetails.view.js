@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Container, Header, Title, Button, Left, Right, Body, Icon, Content, Form, Item, Input, Label, InputGroup } from 'native-base';
 import { Actions } from 'react-native-router-flux';
+import { createEvent } from '../actions/Event.actions';
+import { connect } from 'react-redux';
 
 class EventDetails extends Component {
 
@@ -49,4 +51,8 @@ class EventDetails extends Component {
 
 }
 
-export default EventDetails;
+const mapDispatchToProps = dispatch => ({
+  createEvent: (event) => dispatch(createEvent(event)),
+});
+
+export default connect(null, mapDispatchToProps)(EventDetails);

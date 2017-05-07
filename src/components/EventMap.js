@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { Container, Content, Fab, Text, Header, InputGroup, Left, Icon,View, Input } from 'native-base';
+import { Container, Content, Fab, Text, Header, InputGroup, Icon, Left, View, Input } from 'native-base';
 import MapView from 'react-native-maps';
-import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
+import { Dimensions, StyleSheet, TouchableOpacity, NativeModules } from 'react-native';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 let ScreenHeight = Dimensions.get("window").height;
 
@@ -28,57 +28,72 @@ class EventMap extends Component {
         longitudeDelta: 0.0421,
       },
       lastPosition: '',
-      region: {
-        latitude: LATITUDE,
-        longitude: LONGITUDE,
-        latitudeDelta: LATITUDE_DELTA,
-        longitudeDelta: LONGITUDE_DELTA,
-      },
+      region: null,
+      //   latitude: LATITUDE,
+      //   longitude: LONGITUDE,
+      //   latitudeDelta: LATITUDE_DELTA,
+      //   longitudeDelta: LONGITUDE_DELTA,
+      // },
       position: null,
       watchId: null,
     };
   }
 
   componentDidMount() {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        let tempCoords = {
-          latitude: Number(position.coords.latitude),
-          longitude: Number(position.coords.longitude)
-        };
-      },
-      (error) => alert(error.message),
-      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
-    );
-    this.watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        this.setState({ watchId: position });
-        console.log('watchid: ', position);
-      },
-      (error) => this.setState({ error: error.message }),
-      { enableHighAccuracy: true, timeout: 200000, maximumAge: 1000, distanceFilter: 10 },
-    );
+    // navigator.geolocation.getCurrentPosition(
+    //   (position) => {
+    //     const region = {
+    //       latitudeDelta: LATITUDE_DELTA,
+    //       longitudeDelta: LONGITUDE_DELTA,
+    //       latitude: Number(position.coords.latitude),
+    //       longitude: Number(position.coords.longitude)
+    //     };
+    //     this.setState({ region });
+    //   },
+    //   (error) => alert(error.message),
+    //   {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
+    // );
+    // this.watchId = navigator.geolocation.watchPosition(
+    //   (position) => {
+    //     this.setState({ watchId: position });
+    //     console.log('watchid: ', position);
+    //   },
+    //   (error) => this.setState({ error: error.message }),
+    //   { enableHighAccuracy: true, timeout: 200000, maximumAge: 1000, distanceFilter: 10 },
+    // );
   }
 
   componentWillUnmount() {
-    navigator.geolocation.clearWatch(this.watchID);
+    // navigator.geolocation.clearWatch(this.watchID);
   }
 
   onRegionChange(region) {
+    console.log('region change: ', region);
+    // this.setState({ region });
+  }
+
+  onSelectLocation(location) {
+    const region = Object.assign({}, this.state.region, { latitude: location.lat, longitude: location.lng });
     this.setState({ region });
   }
 
   render() {
     return (
       <Container>
-        <Content>
-
-          <View style={Styles.Container}>
+        <View style={Styles.Content}>
           <MapView.Animated
             style={Styles.Map}
             ref={component => this._map = component}
             showsUserLocation={true}
+            region={this.state.region}
+            loadingEnabled
+            loadingIndicatorColor="#666666"
+            loadingBackgroundColor="#eeeeee"
           />
+          <Fab position="bottomLeft" style={Styles.Fab} active={false}>
+            <Icon color="red" ios='ios-menu' android="md-menu" style={Styles.FabIcon}/>
+          </Fab>
+          <View style={Styles.SearchContainer}>
             <GooglePlacesAutocomplete
               placeholder='search...'
               minLength={2} // minimum length of text to search
@@ -87,8 +102,8 @@ class EventMap extends Component {
               fetchDetails={true}
               renderDescription={(row) => row.description} // custom description render
               onPress={(data, details = null) => { // 'details' is provided when fetchDetails = true
-                console.log(data);
-                console.log(details);
+                console.log('on select autocomplete. details: ', details.geometry.location);
+                this.onSelectLocation(details.geometry.location);
               }}
               getDefaultValue={() => {
                 return ''; // text input default value
@@ -96,7 +111,7 @@ class EventMap extends Component {
               query={{
                 // available options: https://developers.google.com/places/web-service/autocomplete
                 key: 'AIzaSyBBX6uhjICJXGD9O4TXagUd0e3OkbS0LvQ',
-                language: 'en', // language of the results
+                language: 'he', // language of the results
                 types: '(cities)', // default: 'geocode'
               }}
               styles={Styles.Autocomplete}
@@ -105,33 +120,41 @@ class EventMap extends Component {
               nearbyPlacesAPI='GooglePlacesSearch' // Which API to use: GoogleReverseGeocoding or GooglePlacesSearch
               GooglePlacesSearchQuery={{
                 // available options for GooglePlacesSearch API : https://developers.google.com/places/web-service/search
+                key: 'AIzaSyBBX6uhjICJXGD9O4TXagUd0e3OkbS0LvQ',
                 rankby: 'distance',
-                types: 'food',
+                location: {
+                  latitude: this.state.region && this.state.region.latitude ? this.state.region.latitude : 0,
+                  longitude: this.state.region &&  this.state.region.longitude ? this.state.region.longitude : 0,
+                },
               }}
               filterReverseGeocodingByTypes={['locality', 'administrative_area_level_3']} // filter the reverse geocoding results by types - ['locality', 'administrative_area_level_3'] if you want to display only cities
               debounce={200} // debounce the requests in ms. Set to 0 to remove debounce. By default 0ms.
             />
           </View>
-          <Fab
-            position="bottomLeft"
-          >
-            <Icon name="md-share" />
-          </Fab>
-        </Content>
+        </View>
       </Container>
     );
   }
 }
 
 const Styles = {
-  Container: {
+  Content: {
     flex: 1,
-    height: ScreenHeight,
   },
   Map: {
+    flex: 1,
+  },
+  Fab: {
+    backgroundColor: 'gray',
+    opacity: 0.5,
+    color: 'red',
+  },
+  FabIcon: {
+    color:'red',
+  },
+  SearchContainer: {
     position: 'absolute',
     top: 0,
-    bottom: 0,
     left: 0,
     right: 0,
   },
@@ -142,6 +165,7 @@ const Styles = {
       marginTop: 10,
     },
     textInputContainer: {
+
     },
     textInput: {
       marginTop: 0,
@@ -155,12 +179,12 @@ const Styles = {
     description: {
       fontWeight: 'bold',
     },
-    predefinedPlacesDescription: {
-      color: '#1faadb',
-    },
-    loader: {
-      color: 'blue',
-    },
+    // predefinedPlacesDescription: {
+    //   color: '#1faadb',
+    // },
+    // loader: {
+    //   color: 'blue',
+    // },
     listView: {
       opacity: 0.7,
       backgroundColor: 'white',
