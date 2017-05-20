@@ -4,6 +4,7 @@ import { Card, Button, Spinner, Container, Content, Form, InputGroup, Icon, Inpu
 // import { emailChanged, passwordChanged, loginUser } from '../actions';
 import { connect } from 'react-redux';
 import { loginUser } from '../actions/Auth.actions';
+import config from '../../config/config';
 
 class LoginView extends Component {
 
@@ -21,9 +22,27 @@ class LoginView extends Component {
     loginUser({ username, password });
   }
 
+  componentDidMount() {
+    const { auth } = config;
+    if (auth.silentLogin) {
+      const { username, password } = auth;
+      const { loginUser } = this.props;
+      loginUser({ username, password });
+    }
+  }
+
   render(){
     const { username, password } = this.state;
-    const { loginUser } = this.props;
+    // const { loginUser } = this.props;
+    if (config.auth.silentLogin) {
+      return (
+        <Container>
+          <Content>
+            <Spinner color="blue" />
+          </Content>
+        </Container>
+      )
+    }
     return (
       <Container>
         <Content>

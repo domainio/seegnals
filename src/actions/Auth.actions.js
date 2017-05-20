@@ -6,6 +6,8 @@ import {
   LOGIN_USER_FAIL
 } from './index.actions';
 
+// todo: OTP - use twillo - check error handling
+
 export const loginUser = ({ username, password }) => {
   return (dispatch) => {
     dispatch({ type: GLOBAL_LOADING_START });

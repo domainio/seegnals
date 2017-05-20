@@ -8,6 +8,7 @@ import { actions } from 'react-native-navigation-redux-helpers';
 import { Actions } from 'react-native-router-flux';
 import { closeDrawer, openDrawer } from './actions/Drawer.actions';
 import EventMap from './components/EventMap';
+import TestMap from './components/TestMap';
 
 class Main extends Component {
 
@@ -66,7 +67,7 @@ class Main extends Component {
             <EventMap />
           </Tab>
           <Tab heading="Tab3">
-            <Text>three</Text>
+            <TestMap />
           </Tab>
         </Tabs>
       </Container>

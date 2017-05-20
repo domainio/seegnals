@@ -5,6 +5,8 @@ import { StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
 import { createEvent } from '../actions/Event.actions';
 import { loginUser } from '../actions/Auth.actions';
+import DatePicker from 'react-native-datepicker'
+import moment from 'moment';
 
 class NewEvent extends Component {
 
@@ -16,11 +18,17 @@ class NewEvent extends Component {
       datetime: '',
       title: '',
       description: '',
+      date: '',
+      time: '12:00'
     };
+    this.timeFormat = 'HH:mm';
+    this.dateFormat = 'ddd, MMM MM, YYYY';
   }
 
   componentWillMount() {
     // this.props.loginUser({email: 'go@gmail.com', password: '123bla'});
+    const utcNow = moment().utc().valueOf();
+    this.setState({ date: moment(utcNow).format(this.dateFormat) });
   }
 
   createEvent() {
@@ -28,6 +36,18 @@ class NewEvent extends Component {
     this.props.createEvent(event);
     // todo: get target.data from inputs... (((((((
   }
+
+  setDate(date) {
+    this.setState({ date });
+  }
+
+  setTime(time) {
+    this.setState({ time });
+  }
+
+  // tryOpenDatepicker() {
+  //   DatePicker.onPressDate();
+  // }
 
   render() {
     const { title, location, datetime, description } = this.state;
@@ -53,15 +73,61 @@ class NewEvent extends Component {
             <InputGroup>
               <Icon name='flash' style={{color:'#00C497'}}/>
               <Input value={location} placeholder='where' onChangeText={(location) => this.setState({ location })}/>
+
             </InputGroup>
-            <InputGroup>
-              <Icon name='flash' style={{color:'#00C497'}}/>
-              <Input value={datetime} placeholder='when' onChangeText={(datetime) => this.setState({ datetime })}/>
-            </InputGroup>
+            <DatePicker
+              is24Hour={true}
+              style={{width: 200}}
+              date={this.state.date}
+              mode="date"
+              placeholder="select date"
+              format={this.dateFormat}
+              minDate={this.state.date}
+              maxDate={moment(Date.MAX_VALUE).format(this.dateFormat)}
+              confirmBtnText="Confirm"
+              cancelBtnText="Cancel"
+              customStyles={{
+                dateIcon: {
+                  position: 'absolute',
+                  left: 0,
+                  top: 4,
+                  marginLeft: 0
+                },
+                dateInput: {
+                  marginLeft: 36
+                }
+                // ... You can check the source to find the other keys.
+              }}
+              onDateChange={(date) => {this.setDate(date)}}
+            />
+            <DatePicker
+              is24Hour={true}
+              style={{width: 200}}
+              date={this.state.time}
+              mode="time"
+              placeholder="select time"
+              format={this.timeFormat}
+              confirmBtnText="Confirm"
+              cancelBtnText="Cancel"
+              customStyles={{
+                dateIcon: {
+                  position: 'absolute',
+                  left: 0,
+                  top: 4,
+                  marginLeft: 0
+                },
+                dateInput: {
+                  marginLeft: 36
+                }
+                // ... You can check the source to find the other keys.
+              }}
+              onDateChange={(time) => {this.setTime(time)}}
+            />
             <Button rounded block info style={Styles.CreateButton} onPress={this.createEvent.bind(this)}>
               <Text>Create</Text>
             </Button>
           </Form>
+
         </Content>
       </Container>
     );
